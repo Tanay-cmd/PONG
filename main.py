@@ -9,90 +9,102 @@ clock = pygame.time.Clock()
 screen_width = 750
 screen_height = 450
 screen = pygame.display.set_mode((screen_width, screen_height))
+pygame.display.set_caption('PONG')
 
-player = pygame.Rect(0, screen_height/2, 10, 80)
-opponent = pygame.Rect(screen_width - 10 ,screen_height/2, 10, 80)
-ball = pygame.Rect(screen_width/2 - 15, screen_height/2 - 15, 10, 10)
+class Game:
+    
+    def __init__(self):
+        self.player = pygame.Rect(0, screen_height/2, 10, 80)
+        self.opponent = pygame.Rect(screen_width - 10 ,screen_height/2, 10, 80)
+        self.ball = pygame.Rect(screen_width/2 - 15, screen_height/2 - 15, 10, 10)
 
-player_speed = 10
-opponent_speed = 10
-ball_speed_x = 7
-ball_speed_y = 7
+        self.player_speed = 10
+        self.opponent_speed = 10
+        self.ball_speed_x = 7
+        self.ball_speed_y = 7
 
-player_score = 0
-opponent_score = 0
-def movements():
-    global ball_speed_x, ball_speed_y
+        self.player_score = 0
+        self.opponent_score = 0
 
-    ball.x += ball_speed_x
-    ball.y += ball_speed_y                         
-    if ball.midbottom[1] >= screen_height or ball.midbottom[1] <= 0:
-        ball_speed_y *= -1
-    if ball.colliderect(player) or ball.colliderect(opponent):
-        ball_speed_x *= -1
-   
-def rival_movements():
-    keys = pygame.key.get_pressed()
+    def movements(self):
+        
 
-    if keys[pygame.K_w]:
-        player.y -= player_speed
-    elif keys[pygame.K_s]:
-        player.y += player_speed
+        self.ball.x += self.ball_speed_x
+        self.ball.y += self.ball_speed_y                         
+        if self.ball.midbottom[1] >= screen_height or self.ball.midbottom[1] <= 0:
+            self.ball_speed_y *= -1
+        if self.ball.colliderect(self.player) or self.ball.colliderect(self.opponent):
+            self.ball_speed_x *= -1
+    
+    def rival_movements(self):
+        keys = pygame.key.get_pressed()
 
-    # Constraints
-    if player.y < 0:
-        player.y = 0
-    elif player.y > screen_height - player.height:
-        player.y = screen_height - player.height
-def player_movements():
-    keys = pygame.key.get_pressed()
+        if keys[pygame.K_w]:
+            self.player.y -= self.player_speed
+        elif keys[pygame.K_s]:
+            self.player.y += self.player_speed
 
-    if keys[pygame.K_UP]:
-        opponent.y -= opponent_speed
-    elif keys[pygame.K_DOWN]:
-        opponent.y += opponent_speed
+        # Constraints
+        if self.player.y < 0:
+            self.player.y = 0
+        elif self.player.y > screen_height - self.player.height:
+            self.player.y = screen_height - self.player.height
+    def player_movements(self):
+        keys = pygame.key.get_pressed()
 
-    # Constraints
-    if opponent.y < 0:
-        opponent.y = 0
-    elif opponent.y > screen_height - opponent.height:
-        opponent.y = screen_height - opponent.height
+        if keys[pygame.K_UP]:
+            self.opponent.y -= self.opponent_speed
+        elif keys[pygame.K_DOWN]:
+            self.opponent.y += self.opponent_speed
 
-score_font = pygame.font.Font(None, 32)
+        # Constraints
+        if self.opponent.y < 0:
+            self.opponent.y = 0
+        elif self.opponent.y > screen_height - self.opponent.height:
+            self.opponent.y = screen_height - self.opponent.height
 
-def score_system():
-    global player_score, opponent_score
-    if ball.x <= 0: 
-        player_score += 1
-        ball.x = screen_width/2 - 15
-        ball.y = screen_height/2 - 15
-    elif ball.x >= screen_width :
-        opponent_score += 1
-        ball.x = screen_width/2 - 15
-        ball.y = screen_height/2 - 15
+    
 
-    player_score_text = score_font.render(f"{player_score}", False, (200,200,200))
-    opponent_score_text = score_font.render(f"{opponent_score}", False, (200,200,200))
-    screen.blit(player_score_text,(screen_width/4, 20))
-    screen.blit(opponent_score_text,(3*screen_width/4 - 20, 20))
+    def score_system(self):
+        score_font = pygame.font.Font(None, 32)
+        self.player_score, self.opponent_score
+        if self.ball.x <= 0: 
+            self.player_score += 1
+            self.ball.x = screen_width/2 - 15
+            self.ball.y = screen_height/2 - 15
+        elif self.ball.x >= screen_width :
+            self.opponent_score += 1
+            self.ball.x = screen_width/2 - 15
+            self.ball.y = screen_height/2 - 15
 
+        self.player_score_text = score_font.render(f"{self.player_score}", False, (200,200,200))
+        self.opponent_score_text = score_font.render(f"{self.opponent_score}", False, (200,200,200))
+        screen.blit(self.player_score_text,(screen_width/4, 20))
+        screen.blit(self.opponent_score_text,(3*screen_width/4 - 20, 20))
+    
+    def update(self):
+    
+        self.movements()
+        self.rival_movements()
+        self.player_movements()
+        screen.fill('grey12')
+        pygame.draw.rect(screen, "white", self.player)
+        pygame.draw.rect(screen, "white", self.opponent)
+        pygame.draw.ellipse(screen, "white", self.ball)                     
+        pygame.draw.aaline(screen, "white", (screen_width/2 ,0), (screen_width/2 ,screen_height))
+        self.score_system()       
+        
 
+game = Game()
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
-        
+    game.update()
+
     
-    movements()
-    player_movements()
-    rival_movements()
     
-    screen.fill('grey12')
-    pygame.draw.rect(screen, "white", player)
-    pygame.draw.rect(screen, "white", opponent)
-    pygame.draw.ellipse(screen, "white", ball)                     
-    pygame.draw.aaline(screen, "white", (screen_width/2 ,0), (screen_width/2 ,screen_height))
-    score_system()
+
     pygame.display.update()
     clock.tick(60)
